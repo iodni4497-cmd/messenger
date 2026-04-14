@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vild Messenger</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/emoji-picker.css">
+    <script src="scripts/script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Conversations List -->
+        <div class="conversations">
+            <div class="conversations-header">
+                <h2>Vild</h2>
+                <div class="header-actions">
+                    <button class="theme-btn" id="themeToggle">
+                        <img src="assets/icons/sun.svg" alt="Theme" class="theme-icon">
+                    </button>
+                    <button class="compose-lbtn" id="openProfileSettings">
+                        <img src="assets/icons/pencil.svg" alt="Profile Settings">
+                    </button>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search conversations...">
+                <div class="search-results" id="searchResults" style="display: none;"></div>
+            </div>
+
+            <div class="conversation-list" id="conversationList">
+                <!-- Conversations will be loaded dynamically -->
+            </div>
+        </div>
+        
+        <!-- Profile Settings Area (replaces conversations) -->
+        <div class="profile-settings" id="profileSettings" style="display: none;">
+            <div class="profile-header">
+                <button class="back-to-chat" id="backToChat">←</button>
+                <h2>Profile Settings</h2>
+                <button class="theme-btn" id="themeToggleProfile">
+                    <img src="assets/icons/sun.svg" alt="Theme" class="theme-icon-profile">
+                </button>
+            </div>
+            
+            <div class="profile-content">
+                <div id="profileAlert" class="alert" style="display: none;"></div>
+                
+                <div class="avatar-section">
+                    <div class="avatar-upload">
+                        <div class="avatar-preview" id="profileAvatarPreview">
+                            <span id="profileAvatarInitial">U</span>
+                        </div>
+                        <label class="avatar-edit" for="profileAvatarInput">
+                            <img src="assets/icons/pencil.svg" alt="Edit">
+                        </label>
+                        <input type="file" id="profileAvatarInput" accept="image/*" style="display: none;">
+                    </div>
+                </div>
+                
+                <form id="profileSettingsForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" id="profileUsername" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" name="displayName" id="profileDisplayName" placeholder="Your display name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea name="bio" id="profileBio" rows="3" placeholder="Tell us about yourself"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="birthdate" id="profileBirthdate">
+                    </div>
+                    
+                    <button type="submit" class="btn-save">Save Changes</button>
+                    <button type="button" class="btn-logout" id="logoutBtn">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <main class="chat-area" id="chatArea">
+            <div class="chat-header">
+                <div class="chat-user">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0;"></div>
+                    <div>
+                        <h3>Select a chat</h3>
+                        <span class="status"></span>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button>
+                        <img src="assets/icons/search.svg" alt="Search">
+                    </button>
+                    <button>⋮</button>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-chat-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #999; text-align: center; padding: 40px;">
+                    <img src="assets/icons/chat.svg" alt="Chat" style="width: 80px; height: 80px; margin-bottom: 20px; opacity: 0.5;">
+                    <h3 style="font-size: 20px; margin-bottom: 10px; color: #666;">No chat selected</h3>
+                    <p style="font-size: 14px;">Search for a user to start messaging</p>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.doc,.docx,.txt,.zip,.rar">
+                <input type="file" id="imageInput" style="display: none;" accept="image/*,video/*" multiple>
+                <button class="attach-btn" id="attachBtn">
+                    <img src="assets/icons/paperclip.svg" alt="Attach file">
+                </button>
+                <input type="text" id="messageInput" placeholder="Write a message...">
+                <button class="emoji-btn" id="emojiBtn">
+                    <img src="assets/icons/emoji.svg" alt="Emoji">
+                </button>
+                <button class="voice-btn" id="voiceBtn">
+                    <img src="assets/icons/microphone.svg" alt="Voice message" id="voiceBtnIcon">
+                </button>
+            </div>
+            
+            <div class="attach-menu" id="attachMenu" style="display: none;">
+                <button class="attach-option" id="attachImage">
+                    <img src="assets/icons/image.svg" class="attach-icon-svg" alt="Image">
+                    <span>Photo or Video</span>
+                </button>
+                <button class="attach-option" id="attachFile">
+                    <img src="assets/icons/document.svg" class="attach-icon-svg" alt="Document">
+                    <span>Document</span>
+                </button>
+            </div>
+            
+            <div class="voice-recorder" id="voiceRecorder" style="display: none;">
+                <div class="recording-indicator">
+                    <span class="recording-dot"></span>
+                    <span class="recording-time" id="recordingTime">0:00</span>
+                </div>
+                <button class="cancel-recording" id="cancelRecording">✕</button>
+                <button class="send-recording" id="sendRecording">
+                    <img src="assets/icons/send.svg" alt="Send">
+                </button>
+            </div>
+            
+            <div class="emoji-picker" id="emojiPicker">
+                <div class="emoji-picker-header">
+                    <button class="emoji-category active" data-category="smileys">😊</button>
+                    <button class="emoji-category" data-category="gestures">👋</button>
+                    <button class="emoji-category" data-category="animals">🐶</button>
+                    <button class="emoji-category" data-category="food">🍕</button>
+                    <button class="emoji-category" data-category="travel">✈️</button>
+                    <button class="emoji-category" data-category="objects">⚽</button>
+                </div>
+                <div class="emoji-picker-body">
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

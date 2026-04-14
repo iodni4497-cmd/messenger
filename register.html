@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Messenger</title>
+    <link rel="stylesheet" href="auth-style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <button class="theme-toggle-auth" id="themeToggle">
+                <img src="assets/icons/sun.svg" alt="Theme" class="theme-icon">
+            </button>
+            
+            <h1>Create Account</h1>
+            
+            <div id="alert" class="alert" style="display: none;"></div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Register</button>
+            </form>
+            
+            <p class="auth-link">Already have an account? <a href="login.html">Login</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+        
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+            this.classList.toggle('dark');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.src = 'assets/icons/moon.svg';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.src = 'assets/icons/sun.svg';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.classList.add('dark');
+            themeIcon.src = 'assets/icons/moon.svg';
+        }
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const alert = document.getElementById('alert');
+            
+            if (password !== confirmPassword) {
+                alert.className = 'alert error';
+                alert.textContent = 'Passwords do not match';
+                alert.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert.className = 'alert error';
+                alert.textContent = 'Password must be at least 6 characters';
+                alert.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert.className = 'alert success';
+                    alert.textContent = 'Registration successful! Redirecting...';
+                    alert.style.display = 'block';
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                } else {
+                    alert.className = 'alert error';
+                    alert.textContent = data.error;
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.className = 'alert error';
+                alert.textContent = 'Registration failed';
+                alert.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

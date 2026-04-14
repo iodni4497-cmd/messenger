@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings</title>
+    <link rel="stylesheet" href="auth-style.css">
+    <style>
+        .profile-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #0088cc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            font-weight: 600;
+            overflow: hidden;
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: #0088cc;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .avatar-edit img {
+            width: 16px;
+            height: 16px;
+        }
+        
+        #avatarInput {
+            display: none;
+        }
+        
+        body.dark-theme .back-btn {
+            color: #aaa;
+        }
+        
+        body.dark-theme .avatar-edit {
+            border-color: #2d2d2d;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="auth-box">
+            <button class="theme-toggle-auth" id="themeToggle">
+                <img src="icons/sun.svg" alt="Theme" class="theme-icon">
+            </button>
+            
+            <div class="profile-header">
+                <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+                <h1>Profile Settings</h1>
+                <div style="width: 24px;"></div>
+            </div>
+            
+            <div id="alert" class="alert" style="display: none;"></div>
+            
+            <div class="avatar-section">
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="avatarPreview">
+                        <span id="avatarInitial">U</span>
+                    </div>
+                    <label class="avatar-edit" for="avatarInput">
+                        <img src="icons/pencil.svg" alt="Edit">
+                    </label>
+                    <input type="file" id="avatarInput" accept="image/*">
+                </div>
+            </div>
+            
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" id="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" name="displayName" id="displayName" placeholder="Optional">
+                </div>
+                
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea name="bio" id="bio" rows="3" style="width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: 'San Francisco', -apple-system, sans-serif; resize: vertical;" placeholder="Tell us about yourself"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="birthdate" id="birthdate">
+                </div>
+                
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+        
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+            this.classList.toggle('dark');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.src = 'icons/moon.svg';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.src = 'icons/sun.svg';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.classList.add('dark');
+            themeIcon.src = 'icons/moon.svg';
+        }
+        
+        // Load profile data
+        const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+        document.getElementById('username').value = profileData.username || '';
+        document.getElementById('displayName').value = profileData.displayName || '';
+        document.getElementById('bio').value = profileData.bio || '';
+        document.getElementById('birthdate').value = profileData.birthdate || '';
+        
+        if (profileData.avatar) {
+            document.getElementById('avatarPreview').innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
+        } else if (profileData.username) {
+            document.getElementById('avatarInitial').textContent = profileData.username.charAt(0).toUpperCase();
+        }
+        
+        // Avatar upload
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('avatarPreview').innerHTML = `<img src="${event.target.result}" alt="Avatar">`;
+                    profileData.avatar = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Save profile
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const alert = document.getElementById('alert');
+            
+            profileData.username = document.getElementById('username').value;
+            profileData.displayName = document.getElementById('displayName').value;
+            profileData.bio = document.getElementById('bio').value;
+            profileData.birthdate = document.getElementById('birthdate').value;
+            
+            localStorage.setItem('profileData', JSON.stringify(profileData));
+            
+            alert.className = 'alert success';
+            alert.textContent = 'Profile updated successfully!';
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
